@@ -135,6 +135,7 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 		short judge = fun_select(disp, cambuf, 0);
 		if(judge == 1)
 		{
+			Desirespeed_Write(200);
 			mode = -4;     //고가도로
 			CameraYServoControl_Write(1760);
 		}
@@ -174,6 +175,7 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 		int angle = (int)(1500 - fun_select(disp, cambuf, 2)*70/9); 
 		if (after_turnel == 0 && tdata1 > 1000 && tdata2 > 1000)
 		{	
+			DesiredSpeedWrite(200);
 			mode = 10;
 			CarLight_Write(FRONT_ON);
 			after_turnel ++;
