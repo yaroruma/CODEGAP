@@ -212,7 +212,7 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 			DesireSpeed_Write(0);
 			mode = 20;
 		}
-		if (p_mode == 1)
+		if (p_mode == 1) // 주차공간 인식시 encoder를 초기화시킨다
 		{
 			if(pdata < 350)
 			{
@@ -228,7 +228,7 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 			return mode;
 		}
 		
-		else if (p_mode == 2)
+		else if (p_mode == 2) // 두번째 벽 감지
 		{
 			if(pdata > 800 && pdata < 2000)
 			{
@@ -259,35 +259,50 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 		
 	}
 	//4 평행 및 수직 주차 판단
-	else if(mode == 4) 
+	else if(mode == 4)  // 기록한 encoder값을 기준으로 수직/수평 주차를 판단하고 오류값은 배제시킨다
 	{
 		p_mode = 0;
 		int park = EncoderCounter_Read();
-		speed = 80;
-		DesireSpeed_Write(speed);
 
-		if(park > 700 && park < 1100)
+		if(park > 700 && park < 1100) //수평주차
 		{
 			
-			DesireSpeed_Write(80);
-			while(EncoderCounter_Read() < 850 || EncoderCounter_Read() > 900 )
+			speed = (860 - EncoderCounter_Read()); // encoder값에 따라 전진,후진 구분
+			if (speed > 0)
+			{
+				speed = 80;
+			}
+			else
+			{
+				speed = -80;
+			}
+           		DesireSpeed_Write(speed);
+			while(EncoderCounter_Read() < 840 || EncoderCounter_Read() > 880 ) // 840~860 사이의 엔코더값까지 도달
 			{
 				//printf("speed = %d\n",speed);
 			}
 			mode = 5; 
 		}	
-		else if(park <= 600)
+		else if(park <= 600) //수직주차
 		{
-			
-			DesireSpeed_Write(80);
-			while(EncoderCounter_Read() < 630 || EncoderCounter_Read() > 670 )
+			speed = (650 - EncoderCounter_Read()); // encoder값에 따라 전진,후진 구분
+			if (speed > 0)
+			{
+				speed = 80;
+			}
+			else
+			{
+				speed = -80;
+			}
+			DesireSpeed_Write(speed);
+			while(EncoderCounter_Read() < 630 || EncoderCounter_Read() > 670 ) // 630~670 사이의 엔코더값까지 도달
 			{
 
 			}	
 			mode = 6;
 		}
 
-		else if (park > 1100) //일정값 이상이면 주차모드 초기
+		else if (park >= 1100) //일정값 이상이면 주차구역이 아니라고 판단
 		{
 			mode = -1;
 			p_mode = 1;
@@ -298,7 +313,7 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 			mode = -1;
 		}
 	}
-	//5 수평 주차 모드
+	//5 수평 주차 모드 p_cnt는 주행중 주차2번으로 제한, park_cnt는 수직주차 횟수 제한
 	else if(mode == 5)
 	{
 		if(park_cnt == 0)
@@ -347,7 +362,7 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 	{
 		
 		tunnel_right(tdata1, tdata2);
-		if(tdata1<100 || tdata2<100)
+		if(tdata1<100 || tdata2<100) //터널을 통과하면 라이트 off
 		{
 
 			CarLight_Write(ALL_OFF);
