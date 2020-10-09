@@ -326,7 +326,7 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 		}
 		fun_select(disp, cambuf, 5);
 		DesireSpeed_Write(0);
-		while (DistanceSensor(4) < 1500)
+		while (DistanceSensor(4) < 1400 || DistanceSensor(5) <1400)
 		{
 
 		}
