@@ -135,10 +135,18 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 		short judge = fun_select(disp, cambuf, 0);
 		if(judge == 1)
 		{
-			mode = -1;
+			mode = -4;     //고가도로
 			CameraYServoControl_Write(1760);
 		}
 		
+	}
+	
+	else if (mode == -4)
+	{
+		tdata1 = DistanceSensor(2);
+		tdata2 = DistanceSensor(6);
+		tunnel_right(tdata1, tdata2);
+		if(tdata1<100 || tdata2<100) mode=-1;
 	}
 	//-2 차선인식(노란색 + 흰색) 모드
 	else if (mode == -2)
