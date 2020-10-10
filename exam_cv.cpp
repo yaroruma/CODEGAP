@@ -725,6 +725,7 @@ int detect_traffic_light(unsigned char* srcBuf, int iw, int ih, int color_green,
 
 //-----------------------------------------------------------------------------------------------
 
+//돌발 정지
 int detect_sudden_stop(unsigned char* srcBuf, int iw, int ih, int color_red1, int ranges, int saturation_th1, int value_th1, unsigned char* outBuf)
     {
         //input : image, width, height, red hue, yellow hue, green hue, 오차값, saturation, value
