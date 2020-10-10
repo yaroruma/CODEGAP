@@ -31,7 +31,6 @@ extern "C" {
 
 void vertical_parking(void)
 {
-	
 	int angle, speed;
 	//PositionControlOnOff_Write(CONTROL);
 	angle = 1000;
@@ -445,21 +444,21 @@ int line_tracing(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf)  
 
     // 이미지 불러오기, 세팅 //
 	Mat dstRGB(ih, iw, CV_8UC3, outBuf);
-    Mat img_color(ih, iw, CV_8UC3, srcBuf);
-    Mat img_hsv; cvtColor(img_color, img_hsv, CV_BGR2HSV);
+	Mat img_color(ih, iw, CV_8UC3, srcBuf);
+	Mat img_hsv; cvtColor(img_color, img_hsv, CV_BGR2HSV);
     
     //노란색 검출//
-   Scalar lower_white = Scalar(200, 200, 200);
-	Scalar upper_white = Scalar(255, 255, 255);
-	Mat  img_mask1; inRange(img_color, lower_white, upper_white, img_mask1);
-	Mat img_white; bitwise_and(img_color, img_color, img_white, img_mask1);
+	//Scalar lower_white = Scalar(200, 200, 200);
+	//Scalar upper_white = Scalar(255, 255, 255);
+	//Mat  img_mask1; inRange(img_color, lower_white, upper_white, img_mask1);
+	//Mat img_white; bitwise_and(img_color, img_color, img_white, img_mask1);
 
 	Scalar lower_yellow = Scalar(20, 70, 70);
 	Scalar upper_yellow = Scalar(40, 255, 255);
 	Mat  img_mask2; inRange(img_hsv, lower_yellow, upper_yellow, img_mask2);
 		
 	Mat img_yellow;  bitwise_and(img_color, img_color, img_yellow, img_mask2);
-	Mat roi_m; addWeighted(img_yellow, 1.0, img_white, 1.0, 0.0, roi_m);
+	//Mat roi_m; addWeighted(img_yellow, 1.0, img_white, 1.0, 0.0, roi_m);
 
     //캐니(차선 외곽선만 검출)//
     Mat img_gray;
@@ -531,20 +530,20 @@ int line_tracing(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf)  
 }
 //-----------------------------------------------------------------------------------------------
 
-int line_tracing2(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf, int* midpoint)       //OpenCV로 흰색과 노란색을 라인트레이싱
+int line_tracing2(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf)       //OpenCV로 흰색과 노란색을 라인트레이싱
 {
-    int angle;
     // 이미지 불러오기, 세팅 //
     Mat dstRGB(ih, iw, CV_8UC3, outBuf);
     Mat img_color(ih, iw, CV_8UC3, srcBuf);
     Mat img_hsv; cvtColor(img_color, img_hsv, CV_BGR2HSV);
 
-    //노란색 검출//
+    //흰색검출//
     Scalar lower_white = Scalar(200, 200, 200);
     Scalar upper_white = Scalar(255, 255, 255);
     Mat  img_mask1; inRange(img_color, lower_white, upper_white, img_mask1);
     Mat img_white; bitwise_and(img_color, img_color, img_white, img_mask1);
 
+    //노란색 검출//
     Scalar lower_yellow = Scalar(20, 70, 70);
     Scalar upper_yellow = Scalar(40, 255, 255);
     Mat  img_mask2; inRange(img_hsv, lower_yellow, upper_yellow, img_mask2);
@@ -559,62 +558,60 @@ int line_tracing2(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf, 
     Mat edges;
     Canny(img_gray, edges, 50, 150);
     //roi 잘라내기//
-    int div = 4;
-    int atan_x = 0, atan_y = ih * 3 / 8;
-    /*for(int i =0; i < div ; i++){
-    atan_x+= midpoint[i];}
-    atan_x = atan_x - midpoint[3]*4;
-    int p_angle = (int)(atan(atan_x/atan_y)*180/M_PI);
-    atan_x = 0;
-    */
-    //int p_angle = (angle-1500)9/(-90);
-    int offset = angle > 60 ? ih / 8 : 0;
-    Mat roi = edges(Rect(0, ih / 4 + offset, iw, ih / 2));
-    ih /= 2;
-    for (int i = div - 1; i > -1; i--)
+    int div = 2;
+    int atan_x = 0, atan_y = ih / 16;
+    Mat roi = edges(Rect(0, 80, iw, 100));
+
+    int line_bool = 15;
+    for (int i = 1; i > -1; i--)
     {
-        Mat div_l = roi(Rect(0, i * ih / div, midpoint[i], ih / div));
-        Mat div_r = roi(Rect(midpoint[i], i * ih / div, iw - midpoint[i], ih / div));
+        Mat div_l = roi(Rect(line_l[i] - 29, (2 * i + 1) * 10 + 5, 58, 3));
+        Mat div_r = roi(Rect(line_r[i] - 29, (2 * i + 1) * 10 + 5, 58, 3));	
         vector<Point> indices_l;
         vector<Point> indices_r;
-        int avgl = 0, avgr = iw;
         if (countNonZero(div_l) != 0)
         {
             findNonZero(div_l, indices_l);
-            avgl = mean(indices_l)[0];
+            line_l[i] += (indices_l.back().x - 29);
+
+        }
+        else
+        {
+            line_l[i] = 30;
+            line_bool += (i - 2) * 4;
         }
         if (countNonZero(div_r) != 0)
         {
             findNonZero(div_r, indices_r);
-            avgr = mean(indices_r)[0] + midpoint[i];
+            line_r[i] += (indices_r[0].x - 29);
 
         }
+        else
+        {
+            line_r[i] = 290;
+            line_bool += i - 2;
+        }
+        line_l[i] = line_l[i] < 30 ? 30 : line_l[i];
+        line_r[i] = line_r[i] < 30 ? 30 : line_r[i];
+        line_r[i] = line_r[i] > 290 ? 290 : line_r[i];
+        line_l[i] = line_l[i] > 290 ? 290 : line_l[i];
+        int midpoint_y = (int)(2 * i + 1) * 30 / 4 + ih / 2;
+        Point center_l = Point(line_l[i], midpoint_y);
+        circle(img_color, center_l, 5, (0, 0, 255), -1);
+        Point center_r = Point(line_r[i], midpoint_y);
+        circle(img_color, center_r, 5, (0, 0, 255), -1);
+    }
+    if (line_bool / 4 > 2)
+        atan_x = (line_bool % 4 == 3) ? (line_l[0] - line_l[1] + line_r[0] - line_r[1]) / 2 : line_l[0] - line_l[1];
+    else if (line_bool % 4 == 3)
+        atan_x = line_r[0] - line_r[1];
+    else
+        atan_x = (line_l[0] - line_l[1] + line_r[0] - line_r[1]) / 2;
+    s_angle = (atan_x / (float)atan_y) * 45;
+    int r_angle = (int)s_angle;
 
-        midpoint[i] = (avgl + avgr) / 2;
-        if (midpoint[i] > 300)
-            midpoint[i] = 300;
-        else if (midpoint[i] < 20)
-            midpoint[i] = 20;
-        int midpoint_y = i * ih / 2 / div + ih / 2;
-        Point center = Point(midpoint[i], midpoint_y);
-        circle(img_color, center, 5, (0, 0, 255), -1);
-        //atan_x += midpoint[i];
-    }
-    //atan_x = atan_x - midpoint[3]*4;
-    atan_x = midpoint[0] - midpoint[3];
-    atan_y = ih * 3 / 8;
-    if ((midpoint[0] - midpoint[1]) * (midpoint[1] - midpoint[3]) < 0)
-    {
-        atan_x = midpoint[1] - midpoint[3];
-        atan_y = ih / 4;
-        midpoint[0] = midpoint[1] > 160 ? 280 : 40;
-    }
-    angle = (int)(atan(atan_x / atan_y) * 180 / M_PI);
     resize(img_color, dstRGB, Size(320, 180), 0, 0, CV_INTER_LINEAR);
-
-
-
-    return angle;
+    return r_angle;
 }
 
 //-----------------------------------------------------------------------------------------------
