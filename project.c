@@ -357,6 +357,18 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 	//13 추월 전 카메라 전환
 	else if (mode == 13)
 	{
+		if(dir_cnt == 0 && DistanceSensor(2) > 1300){
+			left_choowol();
+			CameraYServoControl_Write(1760);
+			mode = -1;
+			return mode;
+		}else if(dir_cnt == 0 && DistanceSensor(6) > 1300){
+			right_choowol();
+			CameraYServoControl_Write(1760);
+			mode = -1;
+			return mode;	
+		}
+		
 		if(dir_cnt % 2 == 0)
 			CameraXServoControl_Write(2000);
 		else
@@ -385,7 +397,7 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 				mode = -1;
 				return mode;
 			}
-			else{
+			else if(direct2 < direct1){
 				CameraXServoControl_Write(1500);
 				left_choowol();
 				CameraYServoControl_Write(1760);
