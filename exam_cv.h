@@ -12,7 +12,7 @@ void trace_color(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf, i
 void rotate_tracing(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf);
 void tunnel_right(int d1,int d2);
 int line_tracing(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf);
-int line_tracing2(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf, int* midpoint);
+int line_tracing2(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf);
 int detect_traffic_light(unsigned char* srcBuf, int iw, int ih, int color_green, int ranges, int saturation_th3, int value_th3, unsigned char* outBuf);
 int detect_sudden_stop(unsigned char* srcBuf, int iw, int ih, int color_red1, int ranges, int saturation_th1, int value_th1, unsigned char* outBuf);
 int choowol(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf);
