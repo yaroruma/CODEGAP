@@ -125,7 +125,7 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 	printf("endocer = %d\n",EncoderCounter_Read());*/
 	
 	//-4 고가도로
-	else if (mode == -4)
+	if (mode == -4)
 	{
 		tdata1 = DistanceSensor(2);
 		tdata2 = DistanceSensor(6);
@@ -133,7 +133,7 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 		if(tdata1<100 || tdata2<100) mode=-1;
 	}
 	//-3 출발 신호 기다리는 모드
-	if(mode == -3)
+	else if(mode == -3)
 	{
 		
 		short judge = fun_select(disp, cambuf, 0);
