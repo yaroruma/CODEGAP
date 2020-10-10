@@ -84,7 +84,7 @@ static int fun_select(struct display *disp, struct buffer *cambuf, int n)
 		return traffic_result;
 		
 		case 4:
-		//4 sudden_stop
+		//4 돌발 정지
 		int sudden_result = detect_sudden_stop(srcbuf, VPE_OUTPUT_W, VPE_OUTPUT_H, 175, 20, 160, 90);
 		return sudden_result;
 		
@@ -124,7 +124,7 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 	printf("sensor1 = %d   ", DistanceSensor(1));
 	printf("endocer = %d\n",EncoderCounter_Read());*/
 	
-	//-4 주차 벽 
+	//-4 고가도로
 	else if (mode == -4)
 	{
 		tdata1 = DistanceSensor(2);
