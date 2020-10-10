@@ -79,19 +79,15 @@ static int fun_select(struct display *disp, struct buffer *cambuf, int n)
 		return line_tracing(srcbuf, VPE_OUTPUT_W, VPE_OUTPUT_H, cam_pbuf[0]);
 
 		case 3:
-		{
 		//3 신호등
 		int traffic_result = detect_traffic_light(srcbuf, VPE_OUTPUT_W, VPE_OUTPUT_H, 60, 20, 80, 50, cam_pbuf[0]);
 		return traffic_result;
-		}
-
+		
 		case 4:
-		{
-        //4 sudden_stop
-        int sudden_result = detect_sudden_stop(srcbuf, VPE_OUTPUT_W, VPE_OUTPUT_H, 175, 20, 160, 90);
-        return sudden_result;
-        }
-
+		//4 sudden_stop
+		int sudden_result = detect_sudden_stop(srcbuf, VPE_OUTPUT_W, VPE_OUTPUT_H, 175, 20, 160, 90);
+		return sudden_result;
+		
 		case 5:
 		//5 회전교차교
 		rotate_tracing(srcbuf, VPE_OUTPUT_W, VPE_OUTPUT_H, cam_pbuf[0]);
@@ -269,55 +265,45 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 	{
 		p_mode = 0;
 		int park = EncoderCounter_Read();
-
-		if(park > 700 && park < 1100) //수평주차
+		
+		//수평주차
+		if(park > 700 && park < 1100) 
 		{
 			
 			speed = (860 - EncoderCounter_Read()); // encoder값에 따라 전진,후진 구분
 			if (speed > 0)
-			{
 				speed = 80;
-			}
 			else
-			{
 				speed = -80;
-			}
-           		DesireSpeed_Write(speed);
+			DesireSpeed_Write(speed);
 			while(EncoderCounter_Read() < 840 || EncoderCounter_Read() > 880 ) // 840~860 사이의 엔코더값까지 도달
 			{
 				//printf("speed = %d\n",speed);
 			}
 			mode = 5; 
-		}	
-		else if(park <= 600) //수직주차
+		}
+		//수직주차
+		else if(park <= 600) 
 		{
 			speed = (650 - EncoderCounter_Read()); // encoder값에 따라 전진,후진 구분
 			if (speed > 0)
-			{
 				speed = 80;
-			}
 			else
-			{
 				speed = -80;
-			}
 			DesireSpeed_Write(speed);
 			while(EncoderCounter_Read() < 630 || EncoderCounter_Read() > 670 ) // 630~670 사이의 엔코더값까지 도달
 			{
-
 			}	
 			mode = 6;
 		}
-
-		else if (park >= 1100) //일정값 이상이면 주차구역이 아니라고 판단
+		//일정값 이상이면 주차구역이 아니라고 판단
+		else if (park >= 1100) 
 		{
 			mode = -1;
 			p_mode = 1;
 		}
-
 		else
-		{
 			mode = -1;
-		}
 	}
 	//5 수평 주차 모드 p_cnt는 주행중 주차2번으로 제한, park_cnt는 수직주차 횟수 제한
 	else if(mode == 5)
@@ -331,16 +317,11 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 			mode = -1;
 		}
 		else
-		{
 			mode = -1;
-			
-		}
-		
 	}
 	//6 수직 주차 모드
 	else if(mode == 6)
 	{
-		
 		//EncoderCounter_Write(0);
 		vertical_parking();
 		p_cnt += 1;		
@@ -370,7 +351,6 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 		tunnel_right(tdata1, tdata2);
 		if(tdata1<100 || tdata2<100) //터널을 통과하면 라이트 off
 		{
-
 			CarLight_Write(ALL_OFF);
 			mode=-2;
 		}
@@ -401,7 +381,6 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 			mode = 13;
 			if(direct2 > direct1){
 				CameraXServoControl_Write(1500);
-				printf("===========\n=         =\n=  right  =\n=         =\n===========\n");
 				right_choowol();
 				CameraYServoControl_Write(1760);
 				mode = -1;
@@ -409,7 +388,6 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 			}
 			else{
 				CameraXServoControl_Write(1500);
-				printf("==========\n=        =\n=  left  =\n=        =\n==========\n");
 				left_choowol();
 				CameraYServoControl_Write(1760);
 				mode = -1;
@@ -460,14 +438,9 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 		int sudden_red = fun_select(disp, cambuf, 4);
 
 		if (sudden_red == 3000)
-		{
 			mode = 21;
-		}
-
 		else if (sudden_red == 4000)
-		{
 			mode = -1;
 		}
-	}
     return mode;
 }
