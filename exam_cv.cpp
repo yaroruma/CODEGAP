@@ -472,10 +472,11 @@ int line_tracing(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf)  
     int atan_x = 0, atan_y = ih/16;
     Mat roi = edges(Rect(0, 80, iw, 100));		//0  100  iw  80
 
-   int line_bool = 15;
+    int line_bool = 15;				// 차선에서 4개의 점이 인식됐는지 구별하는 변수, 4비트 2진수로 판별
     for (int i = 1; i > -1; i--)
     {
-        Mat div_l = roi(Rect(line_l[i]-29, (2*i+1) * 10+5 , 58, 3));
+	//차선 인식. 이전 차선 좌표에서 좌우 범위에 차선이 있는지 판별//
+	Mat div_l = roi(Rect(line_l[i]-29, (2*i+1) * 10+5 , 58, 3));
         Mat div_r = roi(Rect(line_r[i]-29, (2*i+1) * 10+5 , 58, 3));		//20+15
         vector<Point> indices_l; 
         vector<Point> indices_r; 
@@ -488,7 +489,6 @@ int line_tracing(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf)  
         else
         {
             line_l[i] = 30;
-            //l_bool[i] -= 1;
             line_bool+= (i-2)*4;
         }
         if (countNonZero(div_r) != 0)
@@ -500,9 +500,9 @@ int line_tracing(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf)  
         else
         {
             line_r[i] = 290;
-            //r_bool[i] -= 1;
             line_bool += i-2;
         }
+	//차선 좌표의 최대, 최솟값 설정//
         line_l[i] = line_l[i]<30 ? 30 : line_l[i];
         line_r[i] = line_r[i]<30 ? 30 : line_r[i];
         line_r[i] = line_r[i]>290 ? 290 : line_r[i];
@@ -513,25 +513,21 @@ int line_tracing(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf)  
         Point center_r = Point(line_r[i], midpoint_y);
         circle(img_color, center_r, 5, (0, 0, 255), -1);
     }
-    /////////////////////////////////////
+    //line_bool 함수에 따른 각기 다른 기울기 설정법
+    //좌우 한 쪽만 차선인식이 되면 인식된 차선의 기울기로 조향각 결정
+    //모두 인식되면 각 기울기의 평균값으로 조향각 
     if(line_bool/4 > 2)
         atan_x = (line_bool%4 == 3) ? (line_l[0]-line_l[1]+line_r[0]-line_r[1])/2 : line_l[0]-line_l[1];
     else if(line_bool%4 == 3)
         atan_x = line_r[0]-line_r[1];
     else
         atan_x = (line_l[0]-line_l[1]+line_r[0]-line_r[1])/2;
+    //조향각 계산. 수직축 길이가 짧기 때문에 atan 함수 대신 근사한 직선함수 사용.
     s_angle = (atan_x/(float)atan_y)*45;
     int r_angle = (int)s_angle; 
+    resize(img_color, dstRGB, Size(320,180), 0, 0, CV_INTER_LINEAR);
 
-    
-    //조향각, 속도 수식. 가중치 곱하기//
-	//printf("%d\t",atan_x);
-	//printf("%d\n",atan_y);
-    //angle = (abs(angle - p_angle)<200 ? angle : p_angle);
-	resize(img_color, dstRGB, Size(320,180), 0, 0, CV_INTER_LINEAR);
-
-
-	return r_angle;
+    return r_angle;
 }
 //-----------------------------------------------------------------------------------------------
 
