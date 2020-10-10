@@ -188,6 +188,7 @@ void * capture_thread(void *arg)
         index = vpe_output_dqbuf(vpe);
         capt = vpe->disp_bufs[index];
 	
+	    // 신호등 부분
 	    if (mode != 20){
 	        mode = project(vpe-> disp, capt, mode, green_num);
 	    }
