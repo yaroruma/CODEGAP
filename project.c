@@ -122,12 +122,20 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 	tdata1 = DistanceSensor(2);
 	tdata2 = DistanceSensor(6);
 	
-
-	printf("mode = %d\n   ", mode);
+	/*printf("mode = %d   ", mode);
 	printf("cnt = %d   ", cnt);
-	//printf("p_mode = %d   ", p_mode);
-	printf("sensor1 = %d\n", DistanceSensor(1));
-	//printf("endocer = %d\n",EncoderCounter_Read());
+	printf("p_mode = %d   ", p_mode);
+	printf("sensor1 = %d   ", DistanceSensor(1));
+	printf("endocer = %d\n",EncoderCounter_Read());*/
+	
+	//-4 주차 벽 
+	else if (mode == -4)
+	{
+		tdata1 = DistanceSensor(2);
+		tdata2 = DistanceSensor(6);
+		tunnel_right(tdata1, tdata2);
+		if(tdata1<100 || tdata2<100) mode=-1;
+	}
 	//-3 출발 신호 기다리는 모드
 	if(mode == -3)
 	{
@@ -141,23 +149,21 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 		}
 		
 	}
-	
-	else if (mode == -4)
-	{
-		tdata1 = DistanceSensor(2);
-		tdata2 = DistanceSensor(6);
-		tunnel_right(tdata1, tdata2);
-		if(tdata1<100 || tdata2<100) mode=-1;
-	}
 	//-2 차선인식(노란색 + 흰색) 모드
 	else if (mode == -2)
     	{
-        	int angle = 1500 - fun_select(disp, cambuf, 1) * 70 / 9;
-        	angle = (angle > 2000) ? 2000 : angle;
-        	angle = (angle < 1000) ? 1000 : angle;
-        	int speed = (abs(angle - 1500) > 60) ? 70 : 100;
-        	SteeringServoControl_Write(angle);
-        	DesireSpeed_Write(speed);
+        	int angle = (int)(1500 - fun_select(disp, cambuf, 1) * 70 / 9);
+		if (angle > 1550){
+			EncoderCounter_Write(0);
+			angle = (angle > 2000) ? 2000 : angle + 300;
+		}
+		else if (angle < 1000){
+			EncoderCounter_Write(0);
+			angle = 1000;
+		}
+		int speed = (abs(angle - 1500) > 1) ? 100 : 100;
+		SteeringServoControl_Write(angle);
+		DesireSpeed_Write(speed);
 
 		if (DistanceSensor(1) >= 1300)
 		{
@@ -443,28 +449,25 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
 
 		return total_return;
 	}
-	
+	//21 돌발정지
+	else if (mode == 21)
+	{
+		int angle = 1500;
+		int speed = 0;
+		SteeringServoControl_Write(angle);
+		DesireSpeed_Write(speed);
 
-    else if (mode == 21)            //돌발정지
-    {
+		int sudden_red = fun_select(disp, cambuf, 4);
 
-        int angle = 1500;
-            int speed = 0;
-            SteeringServoControl_Write(angle);
-            DesireSpeed_Write(speed);
+		if (sudden_red == 3000)
+		{
+			mode = 21;
+		}
 
-        int sudden_red = fun_select(disp, cambuf, 4);
-
-        if (sudden_red == 3000)
-        {
-            mode = 21;
-        }
-
-        else if (sudden_red == 4000)
-        {
-                mode = -1;
-        }
-    }
-
+		else if (sudden_red == 4000)
+		{
+			mode = -1;
+		}
+	}
     return mode;
 }
