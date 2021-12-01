@@ -7,6 +7,16 @@
 
 ## Mission   
 ![mission](https://user-images.githubusercontent.com/72549957/144243402-75ec342d-69a1-46f2-a93c-93f4146443eb.PNG)
+
+## Environment
+ - Ubuntu 16.04
+ - minicom, SSH
+ - ARM Toolchain(arm-linux-gnueabi)
+ - openCV2
+
+## Hardware
+![hardware](https://user-images.githubusercontent.com/72549957/144246310-30bff65b-d787-401c-ac95-958726723481.PNG)
+
 ## `project.c`
 각 미션을 수행하기 위해 판단 및 분기.
 ```c
@@ -16,8 +26,7 @@ int project(struct display *disp, struct buffer *cambuf, int mode, int green_num
                             // 영상과 센서값들을 통해 조건을 판별하여 각각의 모드 실행
 ```
 
-## `exam_cv.cpp`
-requires - openCV2   
+## `exam_cv.cpp`   
 영상인식을 통한 미션, 모드별 동작 실행.
 ```cpp
 int line_tracing(unsigned char* srcBuf, int iw, int ih, unsigned char* outBuf);
